@@ -121,7 +121,7 @@ Two supported approaches:
 
    ```kotlin
    jpackage {
-       runtimeImage.set(layout.projectDirectory.dir("C:/tools/jdk8u492-b09/jre"))
+       runtimeImage.set(layout.projectDirectory.dir("C:/tools/jdk8u504-b01/jre"))
    }
    ```
 
