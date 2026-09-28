@@ -75,6 +75,7 @@ public abstract class JPackagePlugin implements Plugin<Project> {
 
         // Side-by-side installs: derive a per-version upgrade UUID (so MSI does not treat the new
         // version as an upgrade of the old one) and default the install dir to <name>/<version>.
+        // The install dir must be absolute on Linux and macOS, so only Windows gets that default.
         Provider<String> versionedUuid = extension.getAppName().zip(extension.getAppVersion(),
                 (name, version) -> UUID.nameUUIDFromBytes(
                         (name + '/' + version).getBytes(StandardCharsets.UTF_8)).toString());
@@ -83,8 +84,10 @@ public abstract class JPackagePlugin implements Plugin<Project> {
         Provider<String> absent = providers.provider(() -> (String) null);
         installer.getWinUpgradeUuid().convention(
                 installer.getSideBySide().flatMap(sideBySide -> sideBySide ? versionedUuid : absent));
-        installer.getInstallDir().convention(
-                installer.getSideBySide().flatMap(sideBySide -> sideBySide ? versionedInstallDir : absent));
+        if (OsUtil.isWindows()) {
+            installer.getInstallDir().convention(
+                    installer.getSideBySide().flatMap(sideBySide -> sideBySide ? versionedInstallDir : absent));
+        }
 
         JavaToolchainService toolchains = project.getExtensions().getByType(JavaToolchainService.class);
         Provider<JavaLauncher> jpackageLauncher = toolchains.launcherFor(spec ->
@@ -152,6 +155,7 @@ public abstract class JPackagePlugin implements Plugin<Project> {
             task.getAppName().set(extension.getAppName());
             task.getAppVersion().set(extension.getAppVersion());
             task.getVendor().set(extension.getVendor());
+            task.getAppDescription().set(extension.getDescription());
             task.getLicenseFile().set(installer.getLicenseFile());
             task.getAboutUrl().set(installer.getAboutUrl());
             task.getInstallDir().set(installer.getInstallDir());

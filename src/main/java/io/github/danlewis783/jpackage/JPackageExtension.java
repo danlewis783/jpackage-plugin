@@ -39,7 +39,9 @@ public abstract class JPackageExtension {
 
     /**
      * Application version. Defaults to the project version, or {@code 1.0.0} when the project
-     * version is unspecified. Windows installers require a numeric {@code x.y.z} version.
+     * version is unspecified. On Windows the version must be numeric (no {@code -SNAPSHOT}),
+     * and installers further require 2 to 4 components with major and minor at most 255 and
+     * build at most 65535, e.g. {@code 1.2.3}.
      */
     public abstract Property<String> getAppVersion();
 
@@ -78,7 +80,8 @@ public abstract class JPackageExtension {
 
     /**
      * Documentation files (README, LICENSE, manuals, ...) copied into the root of the
-     * application image. They end up in the zip, the dev install, and the installers.
+     * application image ({@code Contents/Resources} of the bundle on macOS). They end up in the
+     * zip, the dev install, and the installers.
      */
     public abstract ConfigurableFileCollection getDocFiles();
 

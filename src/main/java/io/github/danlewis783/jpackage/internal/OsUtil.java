@@ -18,6 +18,12 @@ public final class OsUtil {
         return os.contains("mac") || os.contains("darwin");
     }
 
+    /** OS family and architecture, e.g. {@code windows/amd64}; identifies platform-specific outputs. */
+    public static String platform() {
+        String family = isWindows() ? "windows" : isMacOs() ? "macos" : osName();
+        return family + "/" + System.getProperty("os.arch", "");
+    }
+
     /** Resolves the jpackage executable that lives next to the given {@code java} executable. */
     public static File jpackageExecutable(File javaExecutable) {
         return new File(javaExecutable.getParentFile(), isWindows() ? "jpackage.exe" : "jpackage");

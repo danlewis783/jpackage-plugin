@@ -11,7 +11,9 @@ public abstract class InstallerOptions {
 
     /**
      * Installer types to produce, e.g. {@code ["msi"]} or {@code ["msi", "exe"]}.
-     * Defaults to {@code ["msi"]} on Windows and the platform default elsewhere.
+     * Defaults to {@code ["msi"]} on Windows and the platform default elsewhere. Only the current
+     * OS's types can be built: {@code msi}/{@code exe} on Windows, {@code pkg}/{@code dmg} on
+     * macOS, {@code rpm}/{@code deb} on Linux.
      * Building {@code msi}/{@code exe} requires the WiX Toolset on the PATH.
      */
     public abstract ListProperty<String> getTypes();
@@ -24,8 +26,9 @@ public abstract class InstallerOptions {
 
     /**
      * Installation directory. On Windows this is a relative sub-path below the default
-     * installation location, e.g. {@code "MyApp/1.2.3"}. When {@link #getSideBySide() sideBySide}
-     * is enabled (the default) this defaults to {@code <appName>/<appVersion>}.
+     * installation location, e.g. {@code "MyApp/1.2.3"}; on Linux and macOS it must be absolute.
+     * On Windows, when {@link #getSideBySide() sideBySide} is enabled (the default), this
+     * defaults to {@code <appName>/<appVersion>}.
      */
     public abstract Property<String> getInstallDir();
 
@@ -33,7 +36,7 @@ public abstract class InstallerOptions {
      * When {@code true} (the default), different versions of the application can be installed
      * side by side: the Windows upgrade UUID is derived from the app name <em>and version</em>,
      * and the install directory defaults to {@code <appName>/<appVersion>}. Installing a new
-     * version then does not remove the previous one.
+     * version then does not remove the previous one. Applies to Windows installers only.
      *
      * <p>When {@code false}, jpackage's default upgrade UUID (stable across versions) is used,
      * so installing a newer version upgrades/replaces the older one.</p>

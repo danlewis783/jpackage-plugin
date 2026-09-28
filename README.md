@@ -71,7 +71,7 @@ name defaults to the `jar` task's archive name. There is nothing to wire up manu
 | Property | Default | Purpose |
 |---|---|---|
 | `appName` | project name | Application/launcher name |
-| `appVersion` | project version | App version; Windows installers need numeric `x.y.z` |
+| `appVersion` | project version | App version; numeric on Windows (no `-SNAPSHOT`), and Windows installers need 2–4 components (major/minor ≤ 255, build ≤ 65535) |
 | `mainClass` | — (required) | Fully qualified main class |
 | `mainJar` | `jar` task archive name | Main jar file name |
 | `vendor`, `description`, `copyright` | unset | App metadata |
@@ -79,7 +79,7 @@ name defaults to the `jar` task's archive name. There is nothing to wire up manu
 | `winConsole` | `false` | Console launcher (stdio attached) for CLI apps |
 | `javaOptions` | `[]` | JVM options baked into the launcher |
 | `arguments` | `[]` | Default program arguments |
-| `docFiles` | empty | Files copied into the image root (ship in zip, install, installer) |
+| `docFiles` | empty | Files copied into the image root, or `Contents/Resources` on macOS (ship in zip, install, installer) |
 | `jpackageJdkVersion` | JDK running the build | Toolchain major version providing the `jpackage` tool |
 | `runtimeImage` | unset | Pre-built runtime to bundle as-is (e.g. a Java 8 JRE) |
 | `addModules` | jpackage default | Modules jlinked into the generated runtime |
@@ -93,9 +93,9 @@ name defaults to the `jar` task's archive name. There is nothing to wire up manu
 
 | Property | Default | Purpose |
 |---|---|---|
-| `types` | `["msi"]` on Windows | Installer types: `msi`, `exe`, `pkg`, `dmg`, `rpm`, `deb` |
-| `sideBySide` | `true` | Different versions installable side by side (see below) |
-| `installDir` | `<appName>/<version>` when side-by-side | Install location (relative under Program Files on Windows) |
+| `types` | `["msi"]` on Windows | Installer types for the current OS: `msi`/`exe` (Windows), `pkg`/`dmg` (macOS), `rpm`/`deb` (Linux) |
+| `sideBySide` | `true` | Different versions installable side by side on Windows (see below) |
+| `installDir` | `<appName>/<version>` when side-by-side on Windows | Install location (relative under Program Files on Windows, absolute on Linux/macOS) |
 | `licenseFile` | unset | License shown by the installer |
 | `aboutUrl` | unset | URL in the uninstall entry |
 | `winMenu` | `true` | Start Menu entry |
