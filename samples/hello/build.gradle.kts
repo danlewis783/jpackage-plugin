@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.github.danlewis783.jpackage")
+    id("io.github.danlewis783.jpackage") version "0.1.1"
 }
 
 version = "1.2.3"

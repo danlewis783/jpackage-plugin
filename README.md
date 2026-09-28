@@ -87,7 +87,41 @@ name defaults to the `jar` task's archive name. There is nothing to wire up manu
 | `resourceDir` | unset | jpackage resource overrides (WiX customization — see below) |
 | `extraArgs` | `[]` | Escape hatch: extra raw jpackage args (app-image step) |
 | `verbose` | `false` | Pass `--verbose` to jpackage |
-| `devInstallDirectory` | `<user home>/apps/<appName>` | Target of `jpackageInstall` (the task *synchronizes* this directory — it owns it) |
+| `devInstallDirectory` | Gradle property `jpackageDevInstallDirectory` plus `<appName>`, else `<user home>/apps/<appName>` | Target of `jpackageInstall` (the task *synchronizes* this directory — it owns it) |
+
+### Per-user dev install override
+
+For local developer convenience, `jpackageInstall` can use the optional Gradle
+property `jpackageDevInstallDirectory` as the default base directory for dev
+installs.
+
+When this property is set, the plugin installs into:
+
+```text
+<jpackageDevInstallDirectory>/<appName>
+```
+
+Example user Gradle properties:
+
+```text
+jpackageDevInstallDirectory=C:/dev/apps
+```
+
+For an application named `cool-project`, `jpackageInstall` would then
+synchronize this directory:
+
+```text
+C:/dev/apps/cool-project
+```
+
+If the property is not set, the default remains:
+
+```text
+<user home>/apps/<appName>
+```
+
+An explicit `jpackage { devInstallDirectory = ... }` setting in the build script
+still takes precedence over the default convention.
 
 ### `jpackage { installer { ... } }`
 
@@ -121,7 +155,7 @@ Two supported approaches:
 
    ```kotlin
    jpackage {
-       runtimeImage.set(layout.projectDirectory.dir("C:/tools/jdk8u504-b01/jre"))
+       runtimeImage.set(layout.projectDirectory.dir("C:/tools/jdk8u492-b09/jre"))
    }
    ```
 

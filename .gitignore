@@ -1,5 +1,27 @@
-.gradle/
-build/
-.idea/
+############################################
+# Gradle
+############################################
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Kotlin plugin data
+.kotlin
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!/gradle/wrapper/gradle-wrapper.jar
+
+# Ignore the root Gradle build output directory (not packages named "build")
+/build/
+
+# Ignore gradlew Linux script
+gradlew
+
+############################################
+# IntelliJ IDEA
+############################################
+
+.idea
 *.iml
-out/
+out
+*.iws

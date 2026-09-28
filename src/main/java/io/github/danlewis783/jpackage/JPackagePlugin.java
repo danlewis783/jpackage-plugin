@@ -26,8 +26,8 @@ import java.util.UUID;
 
 /**
  * Packages a Java application with the JDK's {@code jpackage} tool.
- *
- * <p>Applies the {@code java} plugin and adds:</p>
+ * <p>
+ * Applies the {@code java} plugin and adds:
  * <ul>
  *   <li>{@code jpackageImage} — self-contained application image (launcher + bundled runtime)</li>
  *   <li>{@code jpackageZip} — the image packaged as a zip under {@code build/distributions}</li>
@@ -62,9 +62,21 @@ public abstract class JPackagePlugin implements Plugin<Project> {
         extension.getWinConsole().convention(false);
         extension.getVerbose().convention(false);
         extension.getJpackageJdkVersion().convention(Integer.parseInt(JavaVersion.current().getMajorVersion()));
-        extension.getDevInstallDirectory().convention(layout.dir(
+        Provider<Directory> defaultDevInstallDirectory = layout.dir(
                 providers.systemProperty("user.home").zip(extension.getAppName(),
-                        (home, name) -> new File(home, "apps" + File.separator + name))));
+                        (home, name) -> new File(home, "apps" + File.separator + name)));
+
+        Provider<Directory> gradlePropertyDevInstallBaseDirectory = layout.dir(
+                providers.gradleProperty("jpackageDevInstallDirectory")
+                        .map(File::new));
+
+        Provider<Directory> gradlePropertyDevInstallDirectory =
+                gradlePropertyDevInstallBaseDirectory.zip(
+                        extension.getAppName(),
+                        (baseDir, appName) -> baseDir.dir(appName));
+
+        extension.getDevInstallDirectory().convention(
+                gradlePropertyDevInstallDirectory.orElse(defaultDevInstallDirectory));
 
         installer.getSideBySide().convention(true);
         installer.getWinMenu().convention(true);

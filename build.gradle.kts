@@ -1,4 +1,5 @@
 import java.time.Duration
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.plugin.compatibility.compatibility
 
 plugins {
@@ -17,6 +18,10 @@ repositories {
 // Gradle 9 requires Java 17 to run, so that is the plugin's bytecode floor.
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(17)
+}
+
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:all,-missing", true)
 }
 
 dependencies {

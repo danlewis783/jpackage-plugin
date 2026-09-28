@@ -32,23 +32,7 @@ class JPackagePluginFunctionalTest {
     @BeforeEach
     void writeProject() throws IOException {
         write("settings.gradle", "rootProject.name = 'hello-cli'\n");
-        write("build.gradle", String.join("\n",
-                "plugins {",
-                "    id 'java'",
-                "    id 'io.github.danlewis783.jpackage'",
-                "}",
-                "version = '2.3.4'",
-                // The packaged application targets Java 8 bytecode.
-                "tasks.withType(JavaCompile).configureEach { options.release = 8 }",
-                "jpackage {",
-                "    appName = 'HelloCli'",
-                "    mainClass = 'demo.Hello'",
-                "    winConsole = true",
-                "    addModules = ['java.base']",
-                "    docFiles.from('README.txt', 'NOTES.txt')",
-                "    devInstallDirectory = layout.buildDirectory.dir('dev-install')",
-                "}",
-                ""));
+        writeBuildFile(true);
         write("README.txt", "readme\n");
         write("NOTES.txt", "notes\n");
         write("src/main/java/demo/Hello.java", String.join("\n",
@@ -106,8 +90,32 @@ class JPackagePluginFunctionalTest {
                 "configuration cache reused; output was:\n" + second.getOutput());
     }
 
+    @Test
+    void usesGradlePropertyForDevInstallBaseDirectoryWhenDslValueIsNotSet() throws Exception {
+        writeBuildFile(false);
+
+        Path devInstallBase = projectDir.resolve("custom-dev-apps");
+        Path expectedInstall = devInstallBase.resolve("HelloCli");
+
+        BuildResult result = runnerWithArguments(
+                "jpackageInstall",
+                "-PjpackageDevInstallDirectory=" + devInstallBase.toAbsolutePath())
+                .build();
+
+        assertEquals(TaskOutcome.SUCCESS, outcomeOf(result, ":jpackageImage"));
+        assertEquals(TaskOutcome.SUCCESS, outcomeOf(result, ":jpackageInstall"));
+        assertTrue(Files.isRegularFile(expectedInstall.resolve("README.txt")),
+                "README.txt in property-driven dev install");
+        assertTrue(Files.isRegularFile(expectedInstall.resolve("NOTES.txt")),
+                "NOTES.txt in property-driven dev install");
+    }
+
     private GradleRunner runner(String... tasks) {
-        List<String> args = new ArrayList<>(Arrays.asList(tasks));
+        return runnerWithArguments(tasks);
+    }
+
+    private GradleRunner runnerWithArguments(String... arguments) {
+        List<String> args = new ArrayList<>(Arrays.asList(arguments));
         args.add("--configuration-cache");
         args.add("--stacktrace");
         return GradleRunner.create()
@@ -141,5 +149,29 @@ class JPackagePluginFunctionalTest {
         Path file = projectDir.resolve(relativePath);
         Files.createDirectories(file.getParent());
         Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void writeBuildFile(boolean setDslDevInstallDirectory) throws IOException {
+        List<String> lines = new ArrayList<>(Arrays.asList(
+                "plugins {",
+                "    id 'java'",
+                "    id 'io.github.danlewis783.jpackage'",
+                "}",
+                "version = '2.3.4'",
+                "tasks.withType(JavaCompile).configureEach { options.release = 8 }",
+                "jpackage {",
+                "    appName = 'HelloCli'",
+                "    mainClass = 'demo.Hello'",
+                "    winConsole = true",
+                "    addModules = ['java.base']",
+                "    docFiles.from('README.txt', 'NOTES.txt')"));
+
+        if (setDslDevInstallDirectory) {
+            lines.add("    devInstallDirectory = layout.buildDirectory.dir('dev-install')");
+        }
+
+        lines.add("}");
+        lines.add("");
+        write("build.gradle", String.join("\n", lines));
     }
 }

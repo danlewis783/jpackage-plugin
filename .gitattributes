@@ -1,5 +1,9 @@
-* text=auto
-*.bat text eol=crlf
-gradlew text eol=lf
-*.jar binary
-*.ico binary
+# Linux start script should use lf
+/gradlew        text eol=lf
+
+# These are Windows script files and should use crlf
+*.bat           text eol=crlf
+
+# Binary files should be left untouched
+*.jar           binary
+*.ico           binary
