@@ -53,29 +53,36 @@ class JPackagePluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, outcomeOf(first, ":jpackageInstall"));
 
         boolean windows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
+        boolean mac = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac");
 
-        // Doc files land in the image root.
-        Path image = projectDir.resolve("build/jpackage/image/HelloCli");
-        assertTrue(Files.isRegularFile(image.resolve("README.txt")), "README.txt in image root");
-        assertTrue(Files.isRegularFile(image.resolve("NOTES.txt")), "NOTES.txt in image root");
+        // Doc files land in the image root, or Contents/Resources for a macOS app bundle.
+        Path image = projectDir.resolve(mac
+                ? "build/jpackage/image/HelloCli.app"
+                : "build/jpackage/image/HelloCli");
+        Path imageDocs = mac ? image.resolve("Contents/Resources") : image;
+        assertTrue(Files.isRegularFile(imageDocs.resolve("README.txt")), "README.txt in app image");
+        assertTrue(Files.isRegularFile(imageDocs.resolve("NOTES.txt")), "NOTES.txt in app image");
 
         // Zip exists and contains a versioned top-level folder.
         Path zip = projectDir.resolve("build/distributions/HelloCli-2.3.4.zip");
         assertTrue(Files.isRegularFile(zip), "zip created");
         try (ZipFile zipFile = new ZipFile(zip.toFile())) {
-            assertNotNull(zipFile.getEntry("HelloCli-2.3.4/README.txt"), "doc file inside zip");
+            String docsEntryPrefix = mac ? "HelloCli-2.3.4/Contents/Resources/" : "HelloCli-2.3.4/";
+            assertNotNull(zipFile.getEntry(docsEntryPrefix + "README.txt"), "doc file inside zip");
             String launcherEntry = windows
                     ? "HelloCli-2.3.4/HelloCli.exe"
-                    : "HelloCli-2.3.4/bin/HelloCli";
+                    : mac ? "HelloCli-2.3.4/Contents/MacOS/HelloCli" : "HelloCli-2.3.4/bin/HelloCli";
             assertNotNull(zipFile.getEntry(launcherEntry), "launcher inside zip");
         }
 
         // Dev install is a copy of the image.
         Path devInstall = projectDir.resolve("build/dev-install");
-        assertTrue(Files.isRegularFile(devInstall.resolve("README.txt")), "doc file in dev install");
+        assertTrue(Files.isRegularFile(devInstall.resolve(
+                mac ? "Contents/Resources/README.txt" : "README.txt")), "doc file in dev install");
 
         // The native launcher actually runs the Java 8-target app on the bundled runtime.
-        Path launcher = windows ? image.resolve("HelloCli.exe") : image.resolve("bin/HelloCli");
+        Path launcher = windows ? image.resolve("HelloCli.exe")
+                : mac ? image.resolve("Contents/MacOS/HelloCli") : image.resolve("bin/HelloCli");
         assertTrue(Files.isRegularFile(launcher), "launcher exists");
         String output = run(launcher);
         assertTrue(output.contains("hello from java"), "launcher output was: " + output);
@@ -105,9 +112,9 @@ class JPackagePluginFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, outcomeOf(result, ":jpackageImage"));
         assertEquals(TaskOutcome.SUCCESS, outcomeOf(result, ":jpackageInstall"));
         assertTrue(Files.isRegularFile(expectedInstall.resolve("README.txt")),
-                "README.txt in property-driven dev install");
+                "doc file in property-driven dev install");
         assertTrue(Files.isRegularFile(expectedInstall.resolve("NOTES.txt")),
-                "NOTES.txt in property-driven dev install");
+                "notes file in property-driven dev install");
     }
 
     private GradleRunner runner(String... tasks) {

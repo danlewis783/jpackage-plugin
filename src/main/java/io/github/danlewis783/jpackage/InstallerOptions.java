@@ -37,9 +37,9 @@ public abstract class InstallerOptions {
      * side by side: the Windows upgrade UUID is derived from the app name <em>and version</em>,
      * and the install directory defaults to {@code <appName>/<appVersion>}. Installing a new
      * version then does not remove the previous one. Applies to Windows installers only.
-     *
-     * <p>When {@code false}, jpackage's default upgrade UUID (stable across versions) is used,
-     * so installing a newer version upgrades/replaces the older one.</p>
+     * <p>
+     * When {@code false}, jpackage's default upgrade UUID (stable across versions) is used,
+     * so installing a newer version upgrades/replaces the older one.
      */
     public abstract Property<Boolean> getSideBySide();
 
