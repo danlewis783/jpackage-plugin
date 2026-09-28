@@ -32,7 +32,7 @@ compatible; all its tasks are incremental and build-cache friendly.
 // settings.gradle.kts of a consumer — see "Consuming the plugin" below
 plugins {
     java
-    id("io.github.danlewis783.jpackage") version "0.1.0"
+    id("io.github.danlewis783.jpackage") version "0.1.1"
 }
 
 version = "1.2.3"
@@ -187,7 +187,7 @@ so on any machine it is just:
 
 ```kotlin
 plugins {
-    id("io.github.danlewis783.jpackage") version "0.1.0"
+    id("io.github.danlewis783.jpackage") version "0.1.1"
 }
 ```
 
